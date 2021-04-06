@@ -1,12 +1,8 @@
 const path = require("path");
-
-// Use the existing dishes data
 const dishes = require(path.resolve("src/data/dishes-data"));
-
-// Use this function to assign ID's when necessary
 const nextId = require("../utils/nextId");
 
-// TODO: Implement the /dishes handlers needed to make the tests pass
+
 
 function getDishById(request, response, next){
     const { dishId } = request.params;
@@ -22,7 +18,7 @@ function getDishById(request, response, next){
 }
 
 function validateDish(request, response, next){
-    const {data: {id, name, description, price, image_url } = {} } = request.body;
+    const {data: {name, description, price, image_url } = {} } = request.body;
     if(!name || name === ""){
         next({
             status: 400,
@@ -41,7 +37,7 @@ function validateDish(request, response, next){
             message: "Dish must include a price"
         })
     }
-    if(price <= 0 || !Number.isInterget(price)){
+    if(price <= 0 || !Number.isInteger(price)){
         next({
             status: 400,
             message: "Dish must have a price that is an integer greater than 0"
@@ -51,6 +47,17 @@ function validateDish(request, response, next){
         next({
             status: 400,
             message: "Dish must include a image_url"
+        })
+    }
+    return next();
+}
+
+function idCheck(request, response, next){
+    if(!request.body.data.id) return next();
+    if(request.body.data.id !== request.params.dishId){
+        return next({
+            status: 400,
+            message: `Dish id: ${request.body.data.id} does not match route id: ${request.params.dishId}`
         })
     }
     next();
@@ -78,7 +85,13 @@ function read(request, response, next){
 }
 
 function update(request, response, next){
-    return;
+    const { name, description, price, image_url } = request.body.data;
+    const { dish } = response.locals;
+    dish.name = name;
+    dish.description = description;
+    dish.price = price;
+    dish.image_url = image_url;
+    response.json({data: dish})
 }
 
 
@@ -86,5 +99,5 @@ module.exports = {
     list,
     create: [validateDish, create],
     read: [getDishById, read],
-    update,
+    update: [getDishById, validateDish, idCheck, update],
 }

@@ -1,12 +1,9 @@
 const path = require("path");
-
-// Use the existing order data
 const orders = require(path.resolve("src/data/orders-data"));
-
-// Use this function to assigh ID's when necessary
 const nextId = require("../utils/nextId");
 
-// TODO: Implement the /orders handlers needed to make the tests pass
+
+
 function orderCheck(request, response, next) {
   const { orderId } = request.params;
   const foundOrder = orders.find((order) => order.id === orderId);
@@ -135,5 +132,5 @@ module.exports = {
   create: [validateOrder, create],
   read: [orderCheck, read],
   update: [orderCheck, validateOrder, checkUpdateStatus, idCheck, update],
-  delete: [orderCheck, checkDestroyStatus, destroy],
+  destroy: [orderCheck, checkDestroyStatus, destroy],
 };
